@@ -1,0 +1,20 @@
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+/.idea
+/.vagrant
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+.env
+
+#Config Developer
+composer.lock
+public/dist
+public/dev
+public/node_modules
+public/mix-manifest.json
+package-lock.json
