@@ -19,7 +19,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\TrustProxies::class,
-        \App\Http\Middleware\Cors::class,/**[Dev: Habilitar como una clase middleware]*/
+        \App\Http\Middleware\Cors::class,// <<< add this line
     ];
 
     /**
@@ -57,7 +57,7 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        "cors" => \App\Http\Middleware\Cors::class,/**[Dev: Habilitar como una ruta middleware]*/
-
+        'cors' => \App\Http\Middleware\Cors::class,// <<< add this line
+        'verify.access.headers' => \App\Http\Middleware\VerifyAccessHeaders::class,// <<< add this line
     ];
 }

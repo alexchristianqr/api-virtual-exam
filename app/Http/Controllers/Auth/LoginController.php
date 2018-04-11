@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Exception;
 
 class LoginController extends Controller
 {
@@ -59,8 +60,8 @@ class LoginController extends Controller
             'email' => 'required|email|max:255|unique:users'
         ];
         $validator = Validator::make($credentials, $rules);
-        if($validator->fails()) {
-            return response()->json(['success'=> false, 'error'=> $validator->messages()]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'error' => $validator->messages()]);
         }
         $name = $request->name;
         $email = $request->email;
@@ -68,7 +69,7 @@ class LoginController extends Controller
 
         $user = User::create(['name' => $name, 'email' => $email, 'password' => Hash::make($password)]);
         $verification_code = str_random(30); //Generate verification code
-        DB::table('user_verifications')->insert(['user_id'=>$user->id,'token'=>$verification_code]);
+        DB::table('user_verifications')->insert(['user_id' => $user->id, 'token' => $verification_code]);
 //        $subject = "Please verify your email address.";
 //        Mail::send('email.verify', ['name' => $name, 'verification_code' => $verification_code],
 //            function($mail) use ($email, $name, $subject){
@@ -76,7 +77,7 @@ class LoginController extends Controller
 //                $mail->to($email, $name);
 //                $mail->subject($subject);
 //            });
-        return response()->json(['success'=> true, 'message'=> 'Thanks for signing up! Please check your email to complete your registration.']);
+        return response()->json(['success' => true, 'message' => 'Thanks for signing up! Please check your email to complete your registration.']);
     }
 
     /**
@@ -87,23 +88,23 @@ class LoginController extends Controller
      */
     public function verifyUser($verification_code)
     {
-        $check = DB::table('user_verifications')->where('token',$verification_code)->first();
-        if(!is_null($check)){
+        $check = DB::table('user_verifications')->where('token', $verification_code)->first();
+        if (!is_null($check)) {
             $user = User::find($check->user_id);
-            if($user->is_verified == 1){
+            if ($user->is_verified == 1) {
                 return response()->json([
-                    'success'=> true,
-                    'message'=> 'Account already verified..'
+                    'success' => true,
+                    'message' => 'Account already verified..'
                 ]);
             }
             $user->update(['is_verified' => 1]);
-            DB::table('user_verifications')->where('token',$verification_code)->delete();
+            DB::table('user_verifications')->where('token', $verification_code)->delete();
             return response()->json([
-                'success'=> true,
-                'message'=> 'You have successfully verified your email address.'
+                'success' => true,
+                'message' => 'You have successfully verified your email address.'
             ]);
         }
-        return response()->json(['success'=> false, 'error'=> "Verification code is invalid."]);
+        return response()->json(['success' => false, 'error' => "Verification code is invalid."]);
     }
 
 
@@ -153,12 +154,13 @@ class LoginController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         $this->validate($request, ['token' => 'required']);
 
         try {
             JWTAuth::invalidate($request->input('token'));
-            return response()->json(['success' => true, 'message'=> "You have successfully logged out."]);
+            return response()->json(['success' => true, 'message' => "You have successfully logged out."]);
         } catch (JWTException $e) {
             // something went wrong whilst attempting to encode the token
             return response()->json(['success' => false, 'error' => 'Failed to logout, please try again.'], 500);
@@ -166,7 +168,8 @@ class LoginController extends Controller
     }
 
 
-    public function login(Request $request){
+    public function login(Request $request)
+    {
 
 //    echo $request;
 //    $credentials = $request->only('email', 'password');
@@ -192,15 +195,43 @@ class LoginController extends Controller
 //    ]);
 
 //        echo $request->email;
-        return User::where("email",$request->email)->get();
-}
+        try {
+//            $user = User::where("username",$request->username)->first();
 
-    public function getAuthUser(Request $request){
+            $data = User::select([
+                'users.id',
+                'users.role_id AS role',
+                'users.project_id AS project',
+                'users.name',
+                'users.username',
+                'users.email',
+                'users.status',
+                'role.name AS role_name',
+                'role.status AS role_status',
+                'project.name AS project_name',
+                'project.status AS project_status'
+            ])
+                ->join('role', 'role.id', '=', 'users.role_id')
+                ->join('project', 'project.id', '=', 'users.project_id')
+                ->where('users.username', $request->username)
+                ->first();
+            if ($data) {
+                $data->role = ['id' => $data->role, 'name' => $data->role_name, 'status' => $data->role_status];
+                $data->project = ['id' => $data->project, 'name' => $data->project_name, 'status' => $data->project_status];
+                return response()->json($data, 200);
+            } else {
+                return response()->json("User not found", 412);
+            }
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
+        }
+    }
+
+    public function getAuthUser(Request $request)
+    {
         $user = JWTAuth::toUser($request->token);
         return response()->json(['result' => $user]);
     }
-
-
 
 
 }

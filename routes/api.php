@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,32 +16,32 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 Route::post('/login', 'Auth\LoginController@login');
 Route::post('/register', 'Auth\LoginController@register');
 
-Route::group(['middleware' => ['cors:api']], function () {
+Route::group(['middleware' => ['cors:api']], function ($route) {
 
     //Survey
-    Route::get('/all-survey', 'SurveyController@all');
-    Route::get('/all-by-user-survey', 'SurveyController@allByUserSurvey');
-    Route::post('/create-survey', 'SurveyController@create');
-    Route::put('/update-user-survey-theme', 'SurveyController@update');
+    $route->get('/all-survey', 'SurveyController@all');
+    $route->get('/all-by-user-survey', 'SurveyController@allByUserSurvey');
+    $route->post('/create-survey', 'SurveyController@create');
+    $route->put('/update-user-survey-theme', 'SurveyController@update');
     //Theme
-    Route::get('/all-theme', 'ThemeController@all');
-    Route::post('/create-theme', 'ThemeController@create');
-    Route::put('/update-theme', 'ThemeController@update');
+    $route->get('/all-theme', 'ThemeController@all');
+    $route->post('/create-theme', 'ThemeController@create');
+    $route->put('/update-theme', 'ThemeController@update');
     //Exam
-    Route::get('/load-exam', 'ExamController@exam');
-    Route::post('/create-exam', 'ExamController@create');
-    Route::put('/update-exam', 'ExamController@update');
+    $route->get('/load-exam', 'ExamController@exam');
+    $route->post('/create-exam', 'ExamController@create');
+    $route->put('/update-exam', 'ExamController@update');
     //Question
-    Route::get('/all-question', 'QuestionController@all');
-    Route::post('/create-question', 'QuestionController@create');
-    Route::put('/update-question/{question_id}', 'QuestionController@update');
+    $route->get('/all-question', 'QuestionController@all');
+    $route->post('/create-question', 'QuestionController@create');
+    $route->put('/update-question/{question_id}', 'QuestionController@update');
     //Answer
-    Route::get('/all-answer', 'AnswerController@all');
+    $route->get('/all-answer', 'AnswerController@all');
     //Option Answer
-    Route::get('/all-option-answer', 'OptionAnswerController@all');
-    Route::post('/create-option-answer', 'OptionAnswerController@create');
-    Route::put('/update-option-answer', 'OptionAnswerController@update');
+    $route->get('/all-option-answer', 'OptionAnswerController@all');
+    $route->post('/create-option-answer', 'OptionAnswerController@create');
+    $route->put('/update-option-answer', 'OptionAnswerController@update');
     //Logout
-    Route::post('/logout', 'AuthController@logout');
+    $route->post('/logout', 'AuthController@logout');
 
 });
