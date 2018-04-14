@@ -17,7 +17,11 @@ Route::post('/login', 'Auth\LoginController@login');
 Route::post('/register', 'Auth\LoginController@register');
 
 Route::group(['middleware' => ['cors:api']], function ($route) {
-
+    //Validate
+    $route->post('/if-exist-user', 'Auth\LoginController@validateIfExist');
+    //Project
+    $route->get('/all-project', 'ProjectController@all');
+    $route->put('/update-project/{user_id}', 'ProjectController@update');
     //Survey
     $route->get('/all-survey', 'SurveyController@all');
     $route->get('/all-by-user-survey', 'SurveyController@allByUserSurvey');
@@ -42,6 +46,6 @@ Route::group(['middleware' => ['cors:api']], function ($route) {
     $route->post('/create-option-answer', 'OptionAnswerController@create');
     $route->put('/update-option-answer', 'OptionAnswerController@update');
     //Logout
-    $route->post('/logout', 'AuthController@logout');
+//    $route->post('/logout', 'AuthController@logout');
 
 });

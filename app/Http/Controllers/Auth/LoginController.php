@@ -9,8 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Tymon\JWTAuth\Exceptions\JWTException;
-use Tymon\JWTAuth\Facades\JWTAuth;
 use Exception;
 
 class LoginController extends Controller
@@ -231,6 +229,11 @@ class LoginController extends Controller
     {
         $user = JWTAuth::toUser($request->token);
         return response()->json(['result' => $user]);
+    }
+
+    function validateIfExist()
+    {
+        return response()->json("usuario si existe", 200);
     }
 
 
