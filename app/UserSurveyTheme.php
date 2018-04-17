@@ -7,7 +7,6 @@ class UserSurveyTheme extends Model {
     protected $table = "user_survey_theme";
 
     protected $fillable = [
-        "id",
         "user_survey_id",
         "theme_id",
         "status",
