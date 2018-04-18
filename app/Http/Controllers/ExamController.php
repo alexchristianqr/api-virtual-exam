@@ -48,17 +48,15 @@ class ExamController extends Controller
     function correctAnswers($request)
     {
         if (is_array($request->answer_by_question)) {
-            $rpta = '';
+            $rpta = [];
             foreach ($request->answer_by_question as $k => $v) {
                 if(!empty($v)){
-                    $rpta = Question::where('id',$v['question_id'])->where('option_answer_id',$v['option_answer_id'])->first();
-                    var_dump($rpta);
-                }else{
-                    $rpta = 'vacio';
+                   array_push($rpta,Question::where('id',$v['question_id'])->where('option_answer_id',$v['option_answer_id'])->first());
+                } else {
+                    $rpta = [];
                 }
             }
             return response()->json($rpta, 200);
-//            return $rpta;
         } else {
             return response()->json('no es un array', 412);
         }

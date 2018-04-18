@@ -68,13 +68,6 @@ class LoginController extends Controller
         $user = User::create(['name' => $name, 'email' => $email, 'password' => Hash::make($password)]);
         $verification_code = str_random(30); //Generate verification code
         DB::table('user_verifications')->insert(['user_id' => $user->id, 'token' => $verification_code]);
-//        $subject = "Please verify your email address.";
-//        Mail::send('email.verify', ['name' => $name, 'verification_code' => $verification_code],
-//            function($mail) use ($email, $name, $subject){
-//                $mail->from(getenv('FROM_EMAIL_ADDRESS'), "From User/Company Name Goes Here");
-//                $mail->to($email, $name);
-//                $mail->subject($subject);
-//            });
         return response()->json(['success' => true, 'message' => 'Thanks for signing up! Please check your email to complete your registration.']);
     }
 
@@ -112,36 +105,6 @@ class LoginController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    /*
-    public function login(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
-
-        $rules = [
-            'email' => 'required|email',
-            'password' => 'required',
-        ];
-        $validator = Validator::make($credentials, $rules);
-        if($validator->fails()) {
-            return response()->json(['success'=> false, 'error'=> $validator->messages()]);
-        }
-
-        $credentials['is_verified'] = 1;
-
-        try {
-            // attempt to verify the credentials and create a token for the user
-            if (! $token = JWTAuth::attempt($credentials)) {
-                return response()->json(['success' => false, 'error' => 'We cant find an account with this credentials. Please make sure you entered the right information and you have verified your email address.'], 401);
-            }
-        } catch (JWTException $e) {
-            echo $e->getMessage();
-            // something went wrong whilst attempting to encode the token
-            return response()->json(['success' => false, 'error' => 'Failed to login, please try again.'], 500);
-        }
-        // all good so return the token
-        return response()->json(['success' => true, 'data'=> [ 'token' => $token ]]);
-    }
-    */
 
     /**
      * Log out
@@ -152,50 +115,8 @@ class LoginController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
-    public function logout(Request $request)
+    public function searchUser($request)
     {
-        $this->validate($request, ['token' => 'required']);
-
-        try {
-            JWTAuth::invalidate($request->input('token'));
-            return response()->json(['success' => true, 'message' => "You have successfully logged out."]);
-        } catch (JWTException $e) {
-            // something went wrong whilst attempting to encode the token
-            return response()->json(['success' => false, 'error' => 'Failed to logout, please try again.'], 500);
-        }
-    }
-
-
-    public function login(Request $request)
-    {
-
-//    echo $request;
-//    $credentials = $request->only('email', 'password');
-
-//    $jwt = '';
-
-//    try {
-//        if (!$jwt = JWTAuth::attempt($credentials)) {
-//            return response()->json([
-//                'response' => 'error',
-//                'message' => 'invalid_credentials',
-//            ], 401);
-//        }
-//    } catch (JWTException $e) {
-//        return response()->json([
-//            'response' => 'error',
-//            'message' => 'failed_to_create_token',
-//        ], 500);
-//    }
-//    return response()->json([
-//        'response' => 'success',
-//        'result' => ['token' => $jwt]
-//    ]);
-
-//        echo $request->email;
-        try {
-//            $user = User::where("username",$request->username)->first();
-
             $data = User::select([
                 'users.id',
                 'users.role_id AS role',
@@ -213,28 +134,38 @@ class LoginController extends Controller
                 ->join('project', 'project.id', '=', 'users.project_id')
                 ->where('users.username', $request->username)
                 ->first();
-            if ($data) {
+
                 $data->role = ['id' => $data->role, 'name' => $data->role_name, 'status' => $data->role_status];
                 $data->project = ['id' => $data->project, 'name' => $data->project_name, 'status' => $data->project_status];
+                return $data;
+    }
+
+    function validateIfExist(Request $request)
+    {
+        try {
+            $User = User::where('username', $request->username)->first();
+            if ($User) {
+                $data = $this->searchUser($request);
                 return response()->json($data, 200);
             } else {
-                return response()->json("User not found", 412);
+                $this->createUser($request);
+                $data = $this->searchUser($request);
+                return response()->json($data, 201);
             }
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);
         }
     }
 
-    public function getAuthUser(Request $request)
+    private function createUser($request)
     {
-        $user = JWTAuth::toUser($request->token);
-        return response()->json(['result' => $user]);
+        $User = new User();
+        $User->fill($request->all());
+        $User->email = $request->username.'@sapia.com.pe';//siempre es invitado
+        $User->role_id = 5;//inicializar como invitado
+        $User->project_id = 1;//inicializar con ningun proyecto asignado
+        $User->status = 'A';//inicializar como activo
+        return $User->save();
     }
-
-    function validateIfExist()
-    {
-        return response()->json("usuario si existe", 200);
-    }
-
 
 }
