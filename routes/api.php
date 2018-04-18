@@ -13,11 +13,11 @@
 */
 
 //Unauthorized
-Route::post('/login', 'Auth\LoginController@login');
-Route::post('/register', 'Auth\LoginController@register');
+//Route::post('/login', 'Auth\LoginController@login');
+//Route::post('/register', 'Auth\LoginController@register');
 
 Route::group(['middleware' => ['cors:api']], function ($route) {
-    //Validate
+    //Validate Exist User
     $route->post('/if-exist-user', 'Auth\LoginController@validateIfExist');
     //Project
     $route->get('/all-project', 'ProjectController@all');
