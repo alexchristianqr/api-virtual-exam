@@ -17,6 +17,8 @@
 //Route::post('/register', 'Auth\LoginController@register');
 
 Route::group(['middleware' => ['cors:api']], function ($route) {
+    //Roles
+    $route->get('/all-role', 'RoleController@all');
     //Validate Exist User
     $route->post('/if-exist-user', 'Auth\LoginController@validateIfExist');
     //Project
