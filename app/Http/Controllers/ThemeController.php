@@ -18,7 +18,6 @@ class ThemeController extends Controller
                 "theme.name AS theme_name",
                 "theme.updated_at AS theme_updated_at",
                 "theme.duration AS theme_duration",
-                "theme.score AS theme_score",
                 "theme.status AS theme_status",
                 "user_survey_theme.id AS user_survey_theme_id",
                 "user_survey_theme.status AS user_survey_theme_status",

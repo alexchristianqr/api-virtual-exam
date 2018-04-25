@@ -93,10 +93,4 @@ class LoginController extends Controller
         return $User->save();
     }
 
-    function getConfig(Request $request)
-    {
-        $User = User::where('',$request->username)->first();
-        return response()->json($User,200);
-    }
-
 }

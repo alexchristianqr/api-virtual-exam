@@ -8,7 +8,9 @@ class UserSurveyTheme extends Model {
 
     protected $fillable = [
         "user_survey_id",
+        "option_answer_ids",
         "theme_id",
+        "score",
         "status",
     ];
 

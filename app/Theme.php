@@ -9,6 +9,7 @@ class Theme extends Model {
     protected $fillable = [
         "id",
         "name",
+        "duration",
         "status",
     ];
 
