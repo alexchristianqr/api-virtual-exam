@@ -5,14 +5,14 @@ use Illuminate\Database\Eloquent\Model;
 class Question extends Model
 {
 
-    protected $table = "question";
+    protected $table = 'question';
 
     protected $fillable = [
-        "id",
-        "theme_id",
-        "name",
-        "option_answer_id",
-        "level",
+        'id',
+        'theme_id',
+        'name',
+        'option_answer_id',
+        'level',
     ];
 
     function returnRules($request)
@@ -20,14 +20,14 @@ class Question extends Model
         $rules = [];
 
         switch ($request->method()){
-            case "POST":
+            case 'POST':
                 $rules = [
                     'theme_id' => 'required',
                     'name' => 'required',
                     'level' => 'required',
                 ];
                 break;
-            case "PUT":
+            case 'PUT':
                 $rules = [
                     'theme_id' => 'required',
                     'name' => 'required',

@@ -4,14 +4,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserSurveyTheme extends Model {
 
-    protected $table = "user_survey_theme";
+    protected $table = 'user_survey_theme';
 
     protected $fillable = [
-        "user_survey_id",
-        "option_answer_ids",
-        "theme_id",
-        "score",
-        "status",
+        'user_survey_id',
+        'option_answer_ids',
+        'theme_id',
+        'score',
+        'status',
     ];
 
     protected $rules = [

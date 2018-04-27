@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Survey;
+use App\UserSurvey;
 use Illuminate\Http\Request;
+use Exception;
 
 class SurveyController extends Controller
 {
@@ -11,11 +13,11 @@ class SurveyController extends Controller
     {
         return (new Survey())
             ->select([
-                "survey.*",
-                "user_survey.id AS user_survey_id",
+                'survey.*',
+                'user_survey.id AS user_survey_id',
             ])
-            ->join("user_survey","user_survey.survey_id","survey.id")
-            ->where("user_survey.user_id",$request->user_id)
+            ->join('user_survey', 'user_survey.survey_id', 'survey.id')
+            ->where('user_survey.user_id', $request->user_id)
             ->get()
             ->toArray();
     }
@@ -26,5 +28,27 @@ class SurveyController extends Controller
             ->select()
             ->get()
             ->toArray();
+    }
+
+    function create(Request $request)
+    {
+        try {
+            $Survey = new Survey();
+            if (is_array($request->get('user_id'))) {
+                foreach ($request->get('user_id') as $item) {
+                    $Survey->fill($request->all());
+                    $Survey->user_id = $item;
+                    $Survey->save();
+                    UserSurvey::create(['user_id' => $item, 'survey_id' => $Survey->id]);
+                }
+            } else {
+                $Survey->fill($request->all())->save();
+                UserSurvey::create(['user_id' => $request->user_id, 'survey_id' => $Survey->id]);
+            }
+            return response()->json('created!', 200);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
+        }
+
     }
 }

@@ -4,13 +4,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class OptionAnswer extends Model {
 
-    protected $table = "option_answer";
+    protected $table = 'option_answer';
 
     protected $fillable = [
-        "id",
-        "question_id",
-        "name",
-        "status",
+        'id',
+        'question_id',
+        'name',
+        'status',
     ];
 
     protected $dates = [];
@@ -19,13 +19,13 @@ class OptionAnswer extends Model {
     {
         $rules = [];
         switch ($request->method()){
-            case "POST":
+            case 'POST':
                 $rules = [
                     'question_id' => 'required',
                     'name' => 'required',
                 ];
                 break;
-            case "PUT":
+            case 'PUT':
                 $rules = [
                     'question_id' => 'required',
                     'name' => 'required',

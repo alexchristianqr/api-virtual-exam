@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 class ExamController extends Controller
 {
 
-    function allQuestionByTheme($theme_id, $colums = ['question.*'])
+    private function allQuestionByTheme($theme_id, $colums = ['question.*'])
     {
         $data = (new Question())
             ->select($colums)
@@ -23,19 +23,23 @@ class ExamController extends Controller
         return $data;
     }
 
-    function exam(Request $request)
+    function loadExam(Request $request)
     {
-        $data = $this->allQuestionByTheme($request->theme_id, ['question.id', 'question.theme_id', 'question.name as question_name', 'question.image as question_image', 'theme.name as theme_name']);
-        //Ciclo para recorrer los datos extraidos de la Base de Datos.
-        foreach ($data as $k => $v) {
-            $data[$k]['options_answers'] = (new OptionAnswerController)->allOptionAnswerByQuestion($v['id']);
+        try {
+            $data = $this->allQuestionByTheme($request->theme_id, ['question.id', 'question.theme_id', 'question.name as question_name', 'question.image as question_image', 'theme.name as theme_name']);
+            //Ciclo para recorrer los datos extraidos de la Base de Datos.
+            foreach ($data as $k => $v) {
+                $data[$k]['options_answers'] = (new OptionAnswerController)->allOptionAnswerByQuestion($v['id']);
+            }
+            //Alear las posiciones del arreglo asociativo.
+            shuffle($data);
+            return response()->json($data, 200);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
         }
-        //Reordenar las posiciones del arreglo asociativo.
-        shuffle($data);
-        return $data;
     }
 
-    function update(Request $request)
+    function updateExam(Request $request)
     {
         try {
             if (is_array($request->answer_by_question)) {
@@ -52,19 +56,26 @@ class ExamController extends Controller
                 $this->checkExam($request, $option_answer_ids);
                 return response()->json('updated!', 200);
             } else {
-                throw new Exception('No es un array()');
+                throw new Exception('Error, no se ha recibido el arreglo de respuestas.');
             }
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);
         }
     }
 
-    function solution($request)
+    function loadExamSolution(Request $request)
     {
+        $dataUserSurveyTheme = UserSurveyTheme::where('id', $request->user_survey_theme_id)->first();
+        $dataQuestions = Question::where('theme_id', $dataUserSurveyTheme->theme_id)->get();
+
+        $dataExamSolution = [];
+//        foreach ($dataQuestions as $dataQuestion) {
+//            $dataExamSolution=
+//        }
 
     }
 
-    function checkExam($request, $option_answer_ids)
+    private function checkExam($request, $option_answer_ids)
     {
         $dataQuestion = Question::where('question.theme_id', $request->theme_id)->get();
         $count_dataQuestion = $dataQuestion->count();
@@ -80,29 +91,27 @@ class ExamController extends Controller
                 }
             }
         }
-//        dd($dataSolution);
         $correctas = 0;
         $incorrectas = 0;
         foreach ($dataSolution as $value) {
             if ($value) {
-                $correctas = $correctas + 1;
+                $correctas = $correctas + 1;//sumar respuestas correctas
             } else {
-                $incorrectas = $incorrectas + 1;
+                $incorrectas = $incorrectas + 1;//sumar respuestas incorrectas
             }
         }
-        // maxima nota 20
-        // 4 preguntas cada una 5 puntos
-
-        $maximun_score = DB::table('settings')->where('name','maximun_score')->first();
-        $valor_maximun_score = (int)$maximun_score->value / $count_dataQuestion;
-
-        $promedio = ($correctas * $valor_maximun_score);
-        $this->getScore($request, $promedio, $option_answer_ids);
+        //Ejemplo: maxima nota 20
+        $puntaje_total = DB::table('settings')->where('name', 'maximun_score')->first();
+        //Ejemplo: 20 puntuacion_total / 50 preguntas = 0.4 puntuacion_por_pregunta
+        $puntaje_por_pregunta = ((int)$puntaje_total->value / $count_dataQuestion);
+        //Obtener puntaje de examen
+        $puntaje = ($correctas * $puntaje_por_pregunta);
+        $this->updateUserSurveyTheme($request, $puntaje, $option_answer_ids);
     }
 
-    function getScore($request, $promedio, $option_answer_ids)
+    private function updateUserSurveyTheme($request, $puntaje, $option_answer_ids)
     {
-        UserSurveyTheme::where('id', $request->user_survey_theme_id)->update(['option_answer_ids' => json_encode($option_answer_ids), 'score' => $promedio, 'status' => 'DD']);
+        UserSurveyTheme::where('id', $request->user_survey_theme_id)->update(['option_answer_ids' => json_encode($option_answer_ids), 'score' => $puntaje, 'status' => 'DD']);
     }
 
 }

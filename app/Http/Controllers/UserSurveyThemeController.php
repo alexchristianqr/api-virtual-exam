@@ -19,8 +19,8 @@ class UserSurveyThemeController extends Controller
         $user_survey_theme = new UserSurveyTheme();
         $this->validate($request, $user_survey_theme->rules);
         return $user_survey_theme
-            ->where("user_survey.id", $request->theme_id)
-            ->update(["user_survey_theme.status" => $request->status]);
+            ->where('user_survey.id', $request->theme_id)
+            ->update(['user_survey_theme.status' => $request->status]);
     }
 
 }
