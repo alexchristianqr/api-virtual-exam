@@ -20,6 +20,7 @@ class ThemeController extends Controller
                 "theme.duration AS theme_duration",
                 "theme.status AS theme_status",
                 "user_survey_theme.id AS user_survey_theme_id",
+                "user_survey_theme.score AS user_survey_theme_score",
                 "user_survey_theme.status AS user_survey_theme_status",
             ])
                 ->join("user_survey_theme", "user_survey_theme.theme_id", "theme.id")

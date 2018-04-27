@@ -6,6 +6,7 @@ use App\Question;
 use App\UserSurveyTheme;
 use Illuminate\Http\Request;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class ExamController extends Controller
 {
@@ -39,19 +40,19 @@ class ExamController extends Controller
         try {
             if (is_array($request->answer_by_question)) {
                 $option_answer_ids = [];
-                foreach ($request->answer_by_question as $k => $v) {
-                    if (!empty($v)) {
-                        array_push($option_answer_ids, ['question_id' => $v['question_id'], 'option_answer_ids' => $v['option_answer_id']]);
+                if (count($request->answer_by_question)) {
+                    foreach ($request->answer_by_question as $k => $v) {
+                        if (!empty($v)) {
+                            array_push($option_answer_ids, ['question_id' => $v['question_id'], 'option_answer_ids' => $v['option_answer_id']]);
+                        } else {
+                            array_push($option_answer_ids, array());
+                        }
                     }
                 }
-//            $encode = json_encode($option_answer_ids);
-//            $decode = json_decode($encode);
-//            dd($decode);
-                UserSurveyTheme::where('id', $request->user_survey_theme_id)->update(['option_answer_ids' => json_encode($option_answer_ids), 'status' => 'P']);
-                $this->checkExam($request);
+                $this->checkExam($request, $option_answer_ids);
                 return response()->json('updated!', 200);
             } else {
-               throw new Exception('No es un array()');
+                throw new Exception('No es un array()');
             }
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);
@@ -63,26 +64,45 @@ class ExamController extends Controller
 
     }
 
-    function checkExam($request)
+    function checkExam($request, $option_answer_ids)
     {
-        $dataUserSurveyTheme = UserSurveyTheme::where('id', $request->user_survey_theme_id)->first();
-        $dataQuestion = Question::where('question.theme_id',$dataUserSurveyTheme->theme_id)->get();
-        $decode_option_answer_ids = json_decode($dataUserSurveyTheme->option_answer_ids);
-
+        $dataQuestion = Question::where('question.theme_id', $request->theme_id)->get();
+        $count_dataQuestion = $dataQuestion->count();
         $dataSolution = [];
-
-        foreach ($dataQuestion as $k => $v){
-            foreach ($decode_option_answer_ids as $vv){
-                dd($v->id,$vv->question_id);
-                if($v->id == $vv->question_id){
-                    array_push($dataSolution,$v->option_answer_id == $vv->option_answer_ids);
-                }else{
-                    array_push($dataSolution, false);
+        foreach ($dataQuestion as $k => $v) {
+            foreach ($option_answer_ids as $kk => $vv) {
+                if ($v->id == $vv['question_id']) {
+                    if (is_null($vv['option_answer_ids'])) {
+                        $dataSolution[$v->id] = false;
+                    } else {
+                        $dataSolution[$v->id] = ($v->option_answer_id == $vv['option_answer_ids']);
+                    }
                 }
             }
         }
+//        dd($dataSolution);
+        $correctas = 0;
+        $incorrectas = 0;
+        foreach ($dataSolution as $value) {
+            if ($value) {
+                $correctas = $correctas + 1;
+            } else {
+                $incorrectas = $incorrectas + 1;
+            }
+        }
+        // maxima nota 20
+        // 4 preguntas cada una 5 puntos
 
-        dd($dataSolution);
+        $maximun_score = DB::table('settings')->where('name','maximun_score')->first();
+        $valor_maximun_score = (int)$maximun_score->value / $count_dataQuestion;
+
+        $promedio = ($correctas * $valor_maximun_score);
+        $this->getScore($request, $promedio, $option_answer_ids);
+    }
+
+    function getScore($request, $promedio, $option_answer_ids)
+    {
+        UserSurveyTheme::where('id', $request->user_survey_theme_id)->update(['option_answer_ids' => json_encode($option_answer_ids), 'score' => $promedio, 'status' => 'DD']);
     }
 
 }
