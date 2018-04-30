@@ -7,7 +7,6 @@ class Theme extends Model {
     protected $table = 'theme';
 
     protected $fillable = [
-        'id',
         'name',
         'duration',
         'status',

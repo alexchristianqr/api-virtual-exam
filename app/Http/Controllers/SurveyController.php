@@ -24,10 +24,7 @@ class SurveyController extends Controller
 
     function all(Request $request)
     {
-        return (new Survey())
-            ->select()
-            ->get()
-            ->toArray();
+        return (new Survey())->get()->toArray();
     }
 
     function create(Request $request)
@@ -37,7 +34,6 @@ class SurveyController extends Controller
             if (is_array($request->get('user_id'))) {
                 foreach ($request->get('user_id') as $item) {
                     $Survey->fill($request->all());
-                    $Survey->user_id = $item;
                     $Survey->save();
                     UserSurvey::create(['user_id' => $item, 'survey_id' => $Survey->id]);
                 }
@@ -45,10 +41,13 @@ class SurveyController extends Controller
                 $Survey->fill($request->all())->save();
                 UserSurvey::create(['user_id' => $request->user_id, 'survey_id' => $Survey->id]);
             }
-            return response()->json('created!', 200);
+            return response()->json('created category!', 200);
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);
         }
 
     }
+
+
+
 }

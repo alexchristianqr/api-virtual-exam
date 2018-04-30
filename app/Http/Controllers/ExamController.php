@@ -105,7 +105,7 @@ class ExamController extends Controller
         //Ejemplo: 20 puntuacion_total / 50 preguntas = 0.4 puntuacion_por_pregunta
         $puntaje_por_pregunta = ((int)$puntaje_total->value / $count_dataQuestion);
         //Obtener puntaje de examen
-        $puntaje = ($correctas * $puntaje_por_pregunta);
+        $puntaje = round($correctas * $puntaje_por_pregunta);//devolver un redondeo con precision
         $this->updateUserSurveyTheme($request, $puntaje, $option_answer_ids);
     }
 

@@ -17,6 +17,8 @@
 //Route::post('/register', 'Auth\LoginController@register');
 
 Route::group(['middleware' => ['cors:api']], function ($route) {
+    //User
+    $route->get('/get-users', 'UserController@getUsers');
     $route->post('/u-object-rest-apis-application', 'UserController@getConfig');
     //Roles
     $route->get('/all-role', 'RoleController@all');
