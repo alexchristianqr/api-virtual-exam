@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\OptionAnswer;
 use App\Question;
 use App\UserSurveyTheme;
 use Illuminate\Http\Request;
@@ -11,16 +12,24 @@ use Illuminate\Support\Facades\DB;
 class ExamController extends Controller
 {
 
-    private function allQuestionByTheme($theme_id, $colums = ['question.*'])
+    //Controllers
+    function createExam(Request $request)
     {
-        $data = (new Question())
-            ->select($colums)
-            ->join('theme', 'theme.id', 'question.theme_id')
-            ->where('question.theme_id', $theme_id)
-            ->where('question.status', 'A')
-            ->get()
-            ->toArray();
-        return $data;
+        $Question = new Question();
+        $request_all = $request->all();
+        try {
+            $Question->fill($request->all())->save();
+            $request->request->add(['question_id' => $Question->id]);
+            foreach ($request->option_answer_ids as $k => $v) {
+                $OptionAnswer = new OptionAnswer();
+                $request->request->set('name', $v['value']);
+                $OptionAnswer->fill($request->all())->save();
+                if ($v['checked']) $Question->where('question.id', $Question->id)->update(['question.option_answer_id' => $OptionAnswer->id]);
+            }
+            return response()->json($request_all, 200);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
+        }
     }
 
     function loadExam(Request $request)
@@ -73,6 +82,17 @@ class ExamController extends Controller
 //            $dataExamSolution=
 //        }
 
+    }
+
+    //Privates
+    private function allQuestionByTheme($theme_id, $colums = ['question.*'])
+    {
+        return Question::select($colums)
+            ->join('theme', 'theme.id', 'question.theme_id')
+            ->where('question.theme_id', $theme_id)
+            ->where('question.status', 'A')
+            ->get()
+            ->toArray();
     }
 
     private function checkExam($request, $option_answer_ids)

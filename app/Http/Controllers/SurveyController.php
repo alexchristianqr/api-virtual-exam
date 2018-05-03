@@ -11,20 +11,25 @@ class SurveyController extends Controller
 {
     function allByUserSurvey(Request $request)
     {
-        return (new Survey())
-            ->select([
-                'survey.*',
-                'user_survey.id AS user_survey_id',
-            ])
-            ->join('user_survey', 'user_survey.survey_id', 'survey.id')
-            ->where('user_survey.user_id', $request->user_id)
-            ->get()
-            ->toArray();
+        try {
+            $Survey = Survey::select(['survey.*', 'user_survey.id AS user_survey_id'])
+                ->join('user_survey', 'user_survey.survey_id', 'survey.id')
+                ->where('user_survey.user_id', $request->user_id);
+            return response()->json($Survey->get(), 200);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
+        }
     }
 
     function all(Request $request)
     {
-        return (new Survey())->get()->toArray();
+        try {
+            $Survey = Survey::select();
+            if ($request->get('status') != "") $Survey = $Survey->where('survey.status', $request->status);
+            return response()->json($Survey->get(), 200);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
+        }
     }
 
     function create(Request $request)
@@ -33,8 +38,7 @@ class SurveyController extends Controller
             $Survey = new Survey();
             if (is_array($request->get('user_id'))) {
                 foreach ($request->get('user_id') as $item) {
-                    $Survey->fill($request->all());
-                    $Survey->save();
+                    $Survey->fill($request->all())->save();
                     UserSurvey::create(['user_id' => $item, 'survey_id' => $Survey->id]);
                 }
             } else {
@@ -47,7 +51,6 @@ class SurveyController extends Controller
         }
 
     }
-
 
 
 }

@@ -12,12 +12,15 @@ class QuestionController extends Controller
 
     function all(Request $request)
     {
-        $question = new Question();
-        $question = $question->select();
-        if($request->get('theme_id') != "") $question = $question->where('question.theme_id',$request->theme_id);
-        if($request->get('level') != "") $question = $question->where('question.level',$request->level);
-        if($request->get('status') != "") $question = $question->where('question.status',$request->status);
-        return $question->get()->toArray();
+        try {
+            $Question = Question::select();
+            if ($request->get('theme_id') != "") $Question = $Question->where('question.theme_id', $request->theme_id);
+            if ($request->get('level') != "") $Question = $Question->where('question.level', $request->level);
+            if ($request->get('status') != "") $Question = $Question->where('question.status', $request->status);
+            return response()->json($Question->get(), 200);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
+        }
     }
 
     function create(Request $request)
@@ -34,13 +37,13 @@ class QuestionController extends Controller
         }
     }
 
-    function update($question_id,Request $request)
+    function update($question_id, Request $request)
     {
         $question = new Question();
         $this->validate($request, $question->returnRules($request));
         DB::beginTransaction();
         try {
-            $question->where('question.id',$question_id)->update($request->all());
+            $question->where('question.id', $question_id)->update($request->all());
             return DB::commit();
         } catch (Exception $e) {
             echo $e->getMessage();

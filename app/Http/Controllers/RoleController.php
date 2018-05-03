@@ -8,7 +8,7 @@ class RoleController extends Controller
 {
     function all()
     {
-        $Roles = Role::where('status','A')->get(['id','name','status']);
+        $Roles = Role::where('role.status','A')->get(['id','name','status']);
         foreach ($Roles as $k => $role) {
             $Roles[$k]['name'] = strtoupper(str_replace(' ', '_', $role->name));
         }

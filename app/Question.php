@@ -13,6 +13,8 @@ class Question extends Model
         'name',
         'option_answer_id',
         'level',
+        'image',
+        'status',
     ];
 
     function returnRules($request)

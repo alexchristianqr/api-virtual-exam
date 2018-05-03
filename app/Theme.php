@@ -8,6 +8,8 @@ class Theme extends Model {
 
     protected $fillable = [
         'name',
+        'date_start',
+        'date_expired',
         'duration',
         'status',
     ];
