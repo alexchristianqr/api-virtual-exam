@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\UserSurvey;
 use Illuminate\Http\Request;
 use App\Theme;
 use Exception;
@@ -12,13 +13,15 @@ class ThemeController extends Controller
     function all(Request $request)
     {
         try {
-            $query = new Theme();
+            $Theme = new Theme();
             if ($request->has('user_survey_theme_id')) {
-                $query = $query->select([
+                $Theme = $Theme->select([
                     'theme.id AS theme_id',
                     'theme.name AS theme_name',
                     'theme.updated_at AS theme_updated_at',
                     'theme.duration AS theme_duration',
+                    'theme.date_start AS theme_date_start',
+                    'theme.date_expired AS theme_date_expired',
                     'theme.status AS theme_status',
                     'user_survey_theme.id AS user_survey_theme_id',
                     'user_survey_theme.score AS user_survey_theme_score',
@@ -30,9 +33,9 @@ class ThemeController extends Controller
                     ->where('user_survey.id', $request->user_survey_theme_id)
                     ->orderBy('theme.id');
             } else {
-                $query = $query->select(['theme.*']);
+                $Theme = $Theme->select(['theme.*']);
             }
-            return response()->json($query->get(), 200);
+            return response()->json($Theme->get(), 200);
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);
         }
@@ -40,17 +43,21 @@ class ThemeController extends Controller
 
     function create(Request $request)
     {
-        $theme = new Theme();
-        $this->validate($request, $theme->rules);
+        $Theme = new Theme();
         DB::beginTransaction();
         try {
-            $theme->fill($request->all())->save();
-            $request->request->add(['theme_id' => $theme->id]);
-            (new UserSurveyThemeController())->create($request);
-            return DB::commit();
+            $Theme->fill($request->all())->save();
+            $request->request->add(['theme_id' => $Theme->id]);
+            $user_survey_ids = UserSurvey::where('user_survey.survey_id', $request->survey_id)->get(['user_survey.id']);
+            foreach ($user_survey_ids as $k => $v) {
+                $request->request->add(['user_survey_id' => $v->id]);
+                (new UserSurveyThemeController())->create($request);
+            }
+            DB::commit();
+            return response()->json($request->all(),200);
         } catch (Exception $e) {
             DB::rollBack();
-            return DB::statement('ALTER TABLE ' . $theme->getTable() . ' AUTO_INCREMENT = ' . (count($theme->all()) + 1));
+            return response()->json($e->getMessage(), 412);
         }
     }
 }

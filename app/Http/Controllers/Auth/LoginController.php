@@ -40,9 +40,41 @@ class LoginController extends Controller
         $this->middleware('cors');
     }
 
+    public function login(Request $request)
+    {
+        try {
+            $User = User::select([
+                'users.id',
+                'users.role_id AS role',
+                'users.project_id AS project',
+                'users.name',
+                'users.username',
+                'users.email',
+                'users.status',
+                'role.name AS role_name',
+                'role.status AS role_status',
+                'project.name AS project_name',
+                'project.status AS project_status'
+            ])
+                ->join('role', 'role.id', '=', 'users.role_id')
+                ->join('project', 'project.id', '=', 'users.project_id')
+                ->where('users.username', $request->username)
+                ->first();
+            if ($User) {
+                $User->role = ['id' => $User->role, 'name' => $User->role_name, 'status' => $User->role_status];
+                $User->project = ['id' => $User->project, 'name' => $User->project_name, 'status' => $User->project_status];
+                return response()->json($User, 200);
+            } else {
+                return response()->json("User not found", 412);
+            }
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
+        }
+    }
+
     public function searchUser($request)
     {
-            $data = User::select([
+            $User = User::select([
                 'users.id',
                 'users.role_id AS role',
                 'users.project_id AS project',
@@ -60,22 +92,22 @@ class LoginController extends Controller
                 ->where('users.username', $request->username)
                 ->first();
 
-                $data->role = ['id' => $data->role, 'name' => $data->role_name, 'status' => $data->role_status];
-                $data->project = ['id' => $data->project, 'name' => $data->project_name, 'status' => $data->project_status];
-                return $data;
+                $User->role = ['id' => $User->role, 'name' => $User->role_name, 'status' => $User->role_status];
+                $User->project = ['id' => $User->project, 'name' => $User->project_name, 'status' => $User->project_status];
+                return $User;
     }
 
     function validateIfExist(Request $request)
     {
         try {
-            $User = User::where('username', $request->username)->first();
-            if ($User) {
-                $data = $this->searchUser($request);
-                return response()->json($data, 200);
+            $dataUser = User::where('username', $request->username)->first();
+            if ($dataUser) {
+                $User = $this->searchUser($request);
+                return response()->json($User, 200);
             } else {
                 $this->createUser($request);
-                $data = $this->searchUser($request);
-                return response()->json($data, 201);
+                $User = $this->searchUser($request);
+                return response()->json($User, 201);
             }
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);

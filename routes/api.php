@@ -13,7 +13,7 @@
 */
 
 //Unauthorized
-//Route::post('/login', 'Auth\LoginController@login');
+Route::post('/login', 'Auth\LoginController@login');
 //Route::post('/register', 'Auth\LoginController@register');
 
 Route::group(['middleware' => ['cors:api']], function ($route) {
@@ -44,8 +44,6 @@ Route::group(['middleware' => ['cors:api']], function ($route) {
     $route->get('/all-question', 'QuestionController@all');
     $route->post('/create-question', 'QuestionController@create');
     $route->put('/update-question/{question_id}', 'QuestionController@update');
-    //Answer
-    $route->get('/all-answer', 'AnswerController@all');
     //Option Answer
     $route->get('/all-option-answer', 'OptionAnswerController@all');
     $route->post('/create-option-answer', 'OptionAnswerController@create');

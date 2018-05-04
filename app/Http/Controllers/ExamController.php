@@ -63,7 +63,7 @@ class ExamController extends Controller
                     }
                 }
                 $this->checkExam($request, $option_answer_ids);
-                return response()->json('updated!', 200);
+                return response()->json($request->all(), 200);
             } else {
                 throw new Exception('Error, no se ha recibido el arreglo de respuestas.');
             }
@@ -77,11 +77,6 @@ class ExamController extends Controller
         $dataUserSurveyTheme = UserSurveyTheme::where('id', $request->user_survey_theme_id)->first();
         $dataQuestions = Question::where('theme_id', $dataUserSurveyTheme->theme_id)->get();
 
-        $dataExamSolution = [];
-//        foreach ($dataQuestions as $dataQuestion) {
-//            $dataExamSolution=
-//        }
-
     }
 
     //Privates
@@ -91,8 +86,7 @@ class ExamController extends Controller
             ->join('theme', 'theme.id', 'question.theme_id')
             ->where('question.theme_id', $theme_id)
             ->where('question.status', 'A')
-            ->get()
-            ->toArray();
+            ->get()->toArray();
     }
 
     private function checkExam($request, $option_answer_ids)

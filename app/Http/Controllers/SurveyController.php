@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Survey;
 use App\UserSurvey;
+use App\UserSurveyTheme;
 use Illuminate\Http\Request;
 use Exception;
 
@@ -45,7 +46,7 @@ class SurveyController extends Controller
                 $Survey->fill($request->all())->save();
                 UserSurvey::create(['user_id' => $request->user_id, 'survey_id' => $Survey->id]);
             }
-            return response()->json('created category!', 200);
+            return response()->json($request->all(), 200);
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);
         }
