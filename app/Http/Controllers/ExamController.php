@@ -2,34 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use App\OptionAnswer;
 use App\Question;
 use App\UserSurveyTheme;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Intervention\Image\Facades\Image;
 
 class ExamController extends Controller
 {
 
+    function saveImage($image, $path, $requestImage)
+    {
+        //Guardar Original
+        $dateFormat = date("dmyhis");
+        //Cambiar de tamaño
+//        $image->resize(240, 200);
+        $image->save($path . $dateFormat . '_'.'.jpg');
+//        $setImage = $dateFormat . '_' . $requestImage->getClientOriginalName();
+//        return $setImage;
+    }
     //Controllers
     function createExam(Request $request)
     {
-        $Question = new Question();
-        $request_all = $request->all();
-        try {
-            $Question->fill($request->all())->save();
-            $request->request->add(['question_id' => $Question->id]);
-            foreach ($request->option_answer_ids as $k => $v) {
-                $OptionAnswer = new OptionAnswer();
-                $request->request->set('name', $v['value']);
-                $OptionAnswer->fill($request->all())->save();
-                if ($v['checked']) $Question->where('question.id', $Question->id)->update(['question.option_answer_id' => $OptionAnswer->id]);
-            }
-            return response()->json($request_all, 200);
-        } catch (Exception $e) {
-            return response()->json($e->getMessage(), 412);
-        }
+//        dd($request->get('option_answer_ids'));
+//        try{
+            $image = Image::make($request->image);
+//        $image = $request->file('image');
+        $pathCopyOrigin = public_path() . '/load_images/copy/';
+//            if($request->hasFile('image'))
+            $this->saveImage($image, $pathCopyOrigin,$request->image);
+            print_r($image);
+                exit();
+//           dd($request->all());
+//        }catch (Exception $e){
+//            return $e->getMessage();
+//        }
+//       dd('alex');
+//        $Question = new Question();
+//        $request_all = $request->all();
+//        try {
+//            $Question->fill($request->all())->save();
+//            $request->request->add(['question_id' => $Question->id]);
+//            foreach ($request->option_answer_ids as $k => $v) {
+//                $OptionAnswer = new OptionAnswer();
+//                $request->request->set('name', $v['value']);
+//                $OptionAnswer->fill($request->all())->save();
+//                if ($v['checked']) $Question->where('question.id', $Question->id)->update(['question.option_answer_id' => $OptionAnswer->id]);
+//            }
+//            return response()->json($request->all(), 200);
+//        } catch (Exception $e) {
+//            return response()->json($e->getMessage(), 412);
+//        }
     }
 
     function loadExam(Request $request)
