@@ -7,7 +7,6 @@ class OptionAnswer extends Model {
     protected $table = 'option_answer';
 
     protected $fillable = [
-        'id',
         'question_id',
         'name',
         'status',

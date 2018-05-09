@@ -54,7 +54,7 @@ class OptionAnswerController extends Controller
         }
     }
 
-    function allOptionAnswerByQuestion($question_id)
+    function allOptionAnswerByQuestion($question_id, $flag)
     {
         $OptionAnswer = OptionAnswer::select("option_answer.*")
             ->join("question", "question.id", "option_answer.question_id")
@@ -62,7 +62,7 @@ class OptionAnswerController extends Controller
             ->where("option_answer.status", "A")
             ->get()
             ->toArray();
-        shuffle($OptionAnswer);
+        if ($flag) shuffle($OptionAnswer);
         return $OptionAnswer;
     }
 }

@@ -1,31 +1,37 @@
-<?php namespace App;
+<?php
 
-use Illuminate\Database\Eloquent\Model;
+namespace App\Http\Requests;
 
-class Question extends Model
+use Illuminate\Foundation\Http\FormRequest;
+
+class ExamRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
 
-    protected $table = 'question';
-
-    protected $fillable = [
-        'theme_id',
-        'name',
-        'option_answer_id',
-        'level',
-        'image',
-        'status',
-    ];
-
-    function returnRules($request)
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
     {
         $rules = [];
 
-        switch ($request->method()){
+        switch ($this->method()) {
             case 'POST':
                 $rules = [
                     'theme_id' => 'required',
                     'name' => 'required',
                     'level' => 'required',
+//                    'option_answer_id' => 'required',
                 ];
                 break;
             case 'PUT':
@@ -39,5 +45,4 @@ class Question extends Model
         }
         return $rules;
     }
-
 }

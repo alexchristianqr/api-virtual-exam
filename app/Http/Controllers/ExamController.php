@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ExamRequest;
+use App\OptionAnswer;
 use App\Question;
 use App\UserSurveyTheme;
 use Illuminate\Http\Request;
@@ -18,58 +20,60 @@ class ExamController extends Controller
         $dateFormat = date("dmyhis");
         //Cambiar de tamaño
 //        $image->resize(240, 200);
-        $image->save($path . $dateFormat . '_'.'.jpg');
+        $image->save($path . $dateFormat . '_' . '.jpg');
 //        $setImage = $dateFormat . '_' . $requestImage->getClientOriginalName();
 //        return $setImage;
     }
-    //Controllers
-    function createExam(Request $request)
+
+    function createExam(ExamRequest $request)
     {
-//        dd($request->get('option_answer_ids'));
-//        try{
+        DB::beginTransaction();
+        try {
+            $Question = new Question();
+            $request_all = $request->all();
             $image = Image::make($request->image);
-//        $image = $request->file('image');
-        $pathCopyOrigin = public_path() . '/load_images/copy/';
-//            if($request->hasFile('image'))
-            $this->saveImage($image, $pathCopyOrigin,$request->image);
-            print_r($image);
-                exit();
-//           dd($request->all());
-//        }catch (Exception $e){
-//            return $e->getMessage();
-//        }
-//       dd('alex');
-//        $Question = new Question();
-//        $request_all = $request->all();
-//        try {
-//            $Question->fill($request->all())->save();
-//            $request->request->add(['question_id' => $Question->id]);
-//            foreach ($request->option_answer_ids as $k => $v) {
-//                $OptionAnswer = new OptionAnswer();
-//                $request->request->set('name', $v['value']);
-//                $OptionAnswer->fill($request->all())->save();
-//                if ($v['checked']) $Question->where('question.id', $Question->id)->update(['question.option_answer_id' => $OptionAnswer->id]);
-//            }
-//            return response()->json($request->all(), 200);
-//        } catch (Exception $e) {
-//            return response()->json($e->getMessage(), 412);
-//        }
+            $pathCopyOrigin = public_path() . '/load_images/copy/';
+            $this->saveImage($image, $pathCopyOrigin, $request->image);
+
+            $Question->fill($request->all());
+            $Question->image = 'logo.svg';
+            $Question->save();
+            $request->request->add(['question_id' => $Question->id]);
+            foreach (json_decode($request->option_answer_ids) as $k => $v) {
+                $OptionAnswer = new OptionAnswer();
+                $request->request->set('name', $v->value);
+                $OptionAnswer->fill($request->all())->save();
+                if ($v->checked) $Question->where('question.id', $Question->id)->update(['question.option_answer_id' => $OptionAnswer->id]);
+            }
+            DB::commit();
+            return response()->json($request_all, 200);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json($e->getMessage(), 412);
+        }
     }
 
     function loadExam(Request $request)
     {
         try {
-            $data = $this->allQuestionByTheme($request->theme_id, ['question.id', 'question.theme_id', 'question.name as question_name', 'question.image as question_image', 'theme.name as theme_name']);
-            //Ciclo para recorrer los datos extraidos de la Base de Datos.
-            foreach ($data as $k => $v) {
-                $data[$k]['options_answers'] = (new OptionAnswerController)->allOptionAnswerByQuestion($v['id']);
-            }
-            //Alear las posiciones del arreglo asociativo.
-            shuffle($data);
+            $data = $this->prepareExam($request->theme_id, ['question.id', 'question.theme_id', 'question.name as question_name', 'question.image as question_image', 'theme.name as theme_name'],true);
             return response()->json($data, 200);
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);
         }
+    }
+
+    private function prepareExam($theme_id, $colums, $flag = false)
+    {
+        $data = $this->allQuestionByTheme($theme_id, $colums);
+        //Ciclo para recorrer los datos extraidos de la Base de Datos.
+        foreach ($data as $k => $v) {
+            $data[$k]['options_answers'] = (new OptionAnswerController)->allOptionAnswerByQuestion($v['id'], $flag);
+        }
+        //Alear las posiciones del arreglo asociativo.
+        if ($flag) shuffle($data);
+
+        return $data;
     }
 
     function updateExam(Request $request)
@@ -98,13 +102,28 @@ class ExamController extends Controller
 
     function loadExamSolution(Request $request)
     {
-        $dataUserSurveyTheme = UserSurveyTheme::where('id', $request->user_survey_theme_id)->first();
-        $dataQuestions = Question::where('theme_id', $dataUserSurveyTheme->theme_id)->get();
+        try {
+            $dataExamSolution = UserSurveyTheme::where('id', $request->user_survey_theme_id)->first();
+            $dataExam = $this->prepareExam($dataExamSolution->theme_id, ['question.id', 'question.theme_id', 'question.name as question_name', 'question.image as question_image', 'question.option_answer_id', 'theme.name as theme_name']);
 
+            $data = ['dataExam' => []];
+            foreach ($dataExam as $k => $v) {
+                foreach (json_decode($dataExamSolution->option_answer_ids) as $kk => $vv) {
+                    if ($v['id'] == $vv->question_id) {
+                        array_push($data['dataExam'], $v);
+                        $data['dataExam'][$k]['user_option_answer_id'] = $vv->option_answer_ids;
+                    }
+                }
+            }
+            $data['score'] =  $dataExamSolution->score;
+            return response()->json(['dataExamSolution' => $data], 200);
+
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
+        }
     }
 
-    //Privates
-    private function allQuestionByTheme($theme_id, $colums = ['question.*'])
+    private function allQuestionByTheme($theme_id, $colums)
     {
         return Question::select($colums)
             ->join('theme', 'theme.id', 'question.theme_id')

@@ -14,7 +14,6 @@
 
 //Unauthorized
 Route::post('/login', 'Auth\LoginController@login');
-//Route::post('/register', 'Auth\LoginController@register');
 
 Route::group(['middleware' => ['cors:api']], function ($route) {
     //User
@@ -38,6 +37,7 @@ Route::group(['middleware' => ['cors:api']], function ($route) {
     $route->put('/update-theme', 'ThemeController@update');
     //Exam
     $route->get('/load-exam', 'ExamController@loadExam');
+    $route->get('/load-exam-solution', 'ExamController@loadExamSolution');
     $route->post('/create-exam', 'ExamController@createExam');
     $route->put('/update-exam', 'ExamController@updateExam');
     //Question
