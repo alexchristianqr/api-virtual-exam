@@ -38,6 +38,7 @@ Route::group(['middleware' => ['cors:api']], function ($route) {
     //Exam
     $route->get('/load-exam', 'ExamController@loadExam');
     $route->get('/load-exam-solution', 'ExamController@loadExamSolution');
+    $route->get('/verify-exam-solution', 'ExamController@verifyExamSolution');
     $route->post('/create-exam', 'ExamController@createExam');
     $route->put('/update-exam', 'ExamController@updateExam');
     //Question

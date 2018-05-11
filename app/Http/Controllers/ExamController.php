@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ExamRequest;
 use App\OptionAnswer;
 use App\Question;
+use App\Theme;
 use App\UserSurveyTheme;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +58,7 @@ class ExamController extends Controller
     function loadExam(Request $request)
     {
         try {
-            $data = $this->prepareExam($request->theme_id, ['question.id', 'question.theme_id', 'question.name as question_name', 'question.image as question_image', 'theme.name as theme_name'],true);
+            $data = $this->prepareExam($request->theme_id, ['question.id', 'question.theme_id', 'question.name as question_name', 'question.image as question_image', 'theme.name as theme_name'], true);
             return response()->json($data, 200);
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);
@@ -105,7 +107,6 @@ class ExamController extends Controller
         try {
             $dataExamSolution = UserSurveyTheme::where('id', $request->user_survey_theme_id)->first();
             $dataExam = $this->prepareExam($dataExamSolution->theme_id, ['question.id', 'question.theme_id', 'question.name as question_name', 'question.image as question_image', 'question.option_answer_id', 'theme.name as theme_name']);
-
             $data = ['dataExam' => []];
             foreach ($dataExam as $k => $v) {
                 foreach (json_decode($dataExamSolution->option_answer_ids) as $kk => $vv) {
@@ -115,9 +116,8 @@ class ExamController extends Controller
                     }
                 }
             }
-            $data['score'] =  $dataExamSolution->score;
-            return response()->json(['dataExamSolution' => $data], 200);
-
+            $data['score'] = $dataExamSolution->score;
+            return response()->json(['dataExamSolution' => $data, 'load' => true], 200);
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);
         }
@@ -168,7 +168,17 @@ class ExamController extends Controller
 
     private function updateUserSurveyTheme($request, $puntaje, $option_answer_ids)
     {
-        UserSurveyTheme::where('id', $request->user_survey_theme_id)->update(['option_answer_ids' => json_encode($option_answer_ids), 'score' => $puntaje, 'status' => 'DD']);
+        UserSurveyTheme::where('id', $request->user_survey_theme_id)->update(['option_answer_ids' => json_encode($option_answer_ids), 'score' => $puntaje, 'status' => 'PR']);
+    }
+
+    //Verificar la programacion para poder visualizar la solucion del examen
+    function verifyExamSolution(Request $request)
+    {
+        if (DB::select('CALL SP_VERIFY_EXAM_SOLUTION(?)', [$request->user_survey_theme_id])[0]->value) {
+            return response()->json(true, 200);
+        } else {
+            return response()->json('Este exámen se encuentra en ejecución, vuelva intentarlo despues de la fecha programada.', 412);
+        }
     }
 
 }

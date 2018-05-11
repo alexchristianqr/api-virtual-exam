@@ -22,6 +22,9 @@ class ThemeController extends Controller
                     'theme.duration AS theme_duration',
                     'theme.date_start AS theme_date_start',
                     'theme.date_expired AS theme_date_expired',
+                    'theme.time_start AS theme_time_start',
+                    'theme.time_expired AS theme_time_expired',
+
                     'theme.status AS theme_status',
                     'user_survey_theme.id AS user_survey_theme_id',
                     'user_survey_theme.score AS user_survey_theme_score',
@@ -30,7 +33,7 @@ class ThemeController extends Controller
                     ->join('user_survey_theme', 'user_survey_theme.theme_id', 'theme.id')
                     ->leftJoin('user_survey', 'user_survey.id', 'user_survey_theme.user_survey_id')
                     ->where('theme.status', 'A')
-                    ->where('user_survey.id', $request->user_survey_theme_id)
+                    ->where('user_survey.id', $request->user_survey_id)
                     ->orderBy('theme.id');
             } else {
                 $Theme = $Theme->select(['theme.*']);

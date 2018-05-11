@@ -10,6 +10,8 @@ class Theme extends Model {
         'name',
         'date_start',
         'date_expired',
+        'time_start',
+        'time_expired',
         'duration',
         'status',
     ];

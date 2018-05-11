@@ -24,13 +24,13 @@ class UserController extends LoginController
         try {
             $data = [];
             $dataUsers = User::where('status', 'A')->get(['id', 'name'])->toArray();
-            array_unshift($dataUsers, ['id' => 0, 'name' => 'Todos']);
+//            array_unshift($dataUsers, ['id' => 0, 'name' => 'Todos']);
             foreach ($dataUsers as $k => $v) {
-                if ($k == 0) {
-                    array_push($data, ['id' => 0, 'value' => 'Todos']);
-                } else {
+//                if ($k == 0) {
+//                    array_push($data, ['id' => 0, 'value' => 'Todos']);
+//                } else {
                     array_push($data, ['id' => $v['id'], 'value' => $v['name']]);
-                }
+//                }
             }
             return response()->json($data, 200);
         } catch (Exception $e) {

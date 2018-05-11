@@ -16,6 +16,7 @@ class SurveyController extends Controller
             $Survey = Survey::select(['survey.*', 'user_survey.id AS user_survey_id'])
                 ->join('user_survey', 'user_survey.survey_id', 'survey.id')
                 ->where('user_survey.user_id', $request->user_id);
+
             return response()->json($Survey->get(), 200);
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 412);
@@ -25,7 +26,9 @@ class SurveyController extends Controller
     function all(Request $request)
     {
         try {
-            $Survey = Survey::select();
+            $Survey = Survey::select(['survey.*', 'user_survey.id AS user_survey_id'])
+                ->join('user_survey', 'user_survey.survey_id', 'survey.id');
+
             if ($request->get('status') != "") $Survey = $Survey->where('survey.status', $request->status);
             return response()->json($Survey->get(), 200);
         } catch (Exception $e) {
