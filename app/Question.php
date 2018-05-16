@@ -13,6 +13,7 @@ class Question extends Model
         'option_answer_id',
         'level',
         'image',
+        'image_url',
         'status',
     ];
 

@@ -11,15 +11,21 @@ class ProjectController extends Controller
 {
     function all()
     {
-        return response()->json(Project::get(),200);
+        try {
+            $Project = Project::where('project.status', 'A')->get();
+            return response()->json($Project, 200);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
+        }
     }
 
-    function update($user_id,Request $request)
+    function update($user_id, Request $request)
     {
-        try{
-            return User::where('id',$user_id)->update(['project_id'=>$request->project_id]);
-        }catch(Exception $e){
-            return response()->json($e->getMessage(),412);
+        try {
+            User::where('id', $user_id)->update(['project_id' => $request->project_id]);
+            return response()->json($request->all(), 200);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 412);
         }
     }
 }

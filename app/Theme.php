@@ -7,18 +7,12 @@ class Theme extends Model {
     protected $table = 'theme';
 
     protected $fillable = [
+        'survey_id',
         'name',
-        'date_start',
-        'date_expired',
-        'time_start',
-        'time_expired',
         'duration',
+        'limit_questions',
+        'description',
         'status',
-    ];
-
-    public $rules = [
-        'name' => 'required',
-        'user_survey_id' => 'required'
     ];
 
 }

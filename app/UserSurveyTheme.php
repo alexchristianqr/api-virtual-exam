@@ -10,13 +10,13 @@ class UserSurveyTheme extends Model {
         'user_survey_id',
         'theme_id',
         'option_answer_ids',
+        'date_start',
+        'date_expired',
+        'time_start',
+        'time_expired',
         'score',
+        'description',
         'status',
-    ];
-
-    protected $rules = [
-        'user_survey_id' => 'required',
-        'theme_id' => 'required',
     ];
 
 }

@@ -9,8 +9,6 @@ class UserSurveyController extends Controller
 {
     function create(Request $request)
     {
-        $theme_survey = new UserSurvey();
-        $this->validate($request, $theme_survey->rules);
-        return $theme_survey->create($request->all());
+        return (new UserSurvey())->create($request->all());
     }
 }
