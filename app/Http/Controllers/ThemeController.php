@@ -50,7 +50,7 @@ trait ServiceTheme
 {
   private function prepare($request)
   {
-    if ($request->has('user_survey_theme_id')) {
+    if ($request->has('user_survey_id')) {
 
       $data = Theme::select([
         'theme.id AS theme_id',
@@ -67,9 +67,9 @@ trait ServiceTheme
         'user_survey_theme.status AS user_survey_theme_status',
       ])
         ->join('user_survey_theme', 'user_survey_theme.theme_id', 'theme.id')
-        ->leftJoin('user_survey', 'user_survey.id', 'user_survey_theme.user_survey_id')
-        ->where('theme.status', 'A')
+        ->leftJoin('user_survey',  'user_survey_theme.user_survey_id','user_survey.id')
         ->where('user_survey.id', $request->user_survey_id)
+        ->where('theme.status', 'A')
         ->orderBy('theme.id');
 
     } elseif ($request->has('survey_id')) {
