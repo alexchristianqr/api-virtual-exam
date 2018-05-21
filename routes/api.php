@@ -11,7 +11,7 @@
 */
 
 //Unauthorized
-Route::post('/login', 'Auth\LoginController@login');
+//Route::post('/login', 'Auth\LoginController@login');
 
 Route::group(['middleware' => ['cors:api']], function ($route) {
 
