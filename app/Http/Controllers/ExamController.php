@@ -97,7 +97,7 @@ class ExamController extends Controller
   //Verificar la programacion para poder visualizar la solucion del examen
   function verifyExamSolution(Request $request)
   {
-    if (DB::select('CALL SP_VERIFY_EXAM_SOLUTION(?)', [$request->user_survey_theme_id])[0]->value) {
+    if (DB::select('CALL sp_verify_exam_solution(?)', [$request->user_survey_theme_id])[0]->value) {
       return response()->json(true, 200);
     } else {
       return response()->json('Este exámen se encuentra en ejecución, vuelva intentarlo despues de la fecha programada.', 412);
