@@ -17,6 +17,7 @@ class UserSurveyTheme extends Model {
         'score',
         'description',
         'status',
+        'status_table',
     ];
 
 }

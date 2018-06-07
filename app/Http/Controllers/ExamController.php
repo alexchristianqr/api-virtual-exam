@@ -35,6 +35,8 @@ class ExamController extends Controller
       return response()->json($request_all, 200);
     } catch (Exception $e) {
       DB::rollback();
+      $this->setTableAutoInc((new Question())->getTable());
+      $this->setTableAutoInc((new OptionAnswer())->getTable());
       return response()->json($e->getMessage(), 412);
     }
   }

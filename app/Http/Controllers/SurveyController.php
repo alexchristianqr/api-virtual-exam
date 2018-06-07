@@ -60,12 +60,11 @@ trait SurveyService
     } else {
       $data = Survey::select(['survey.*']);
     }
-    if ($request->has('status'))
-      if ($request->get('status') != '') {
-        $data = $data->where('survey.status', $request->status);
-      } else {
-        $data = $data->where('survey.status', '!=', '');
-      }
+    if ($request->has('status')) {
+      $data = $data->where('survey.status', $request->status);
+    } else {
+      $data = $data->where('survey.status', 'A');
+    }
     return $data;
   }
 }

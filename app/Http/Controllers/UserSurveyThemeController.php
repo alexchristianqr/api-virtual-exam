@@ -14,27 +14,17 @@ class UserSurveyThemeController extends Controller
   {
     DB::beginTransaction();
     try {
-//      $user_survey_ids = UserSurvey::where('user_survey.survey_id', $request->survey_id)
-//        ->where('user_survey.user_id', $request->user_id)
-//        ->get(['user_survey.id']);
       foreach ($request->user_id as $k => $v) {
         $user_survey_id = UserSurvey::where('user_survey.survey_id', $request->survey_id)->where('user_survey.user_id', $v['id'])->pluck('user_survey.id')[0];
         $request->request->add(['user_survey_id' => $user_survey_id]);
         (new UserSurveyTheme())->fill($request->all())->save();
       }
-
-
-//      $user_survey_ids = UserSurvey::where('user_survey.survey_id', $request->survey_id)
-//        ->where('user_survey.user_id', $request->user_id)
-//        ->get(['user_survey.id']);
-//      foreach ($user_survey_ids as $k => $v) {
-//        $request->request->add(['user_survey_id' => $v['id']]);
-//        (new UserSurveyTheme())->fill($request->all())->save();
-//      }
       DB::commit();
       return response()->json($request->all(), 200);
     } catch (Exception $e) {
       DB::rollBack();
+      $this->setTableAutoInc((new UserSurvey())->getTable());
+      $this->setTableAutoInc((new UserSurveyTheme())->getTable());
       return response()->json($e->getMessage(), 412);
     }
   }
@@ -43,6 +33,23 @@ class UserSurveyThemeController extends Controller
   {
     try {
       return (new UserSurveyTheme())->where('user_survey.id', $request->theme_id)->update(['user_survey_theme.status' => $request->status]);
+    } catch (Exception $e) {
+      return response()->json($e->getMessage(), 412);
+    }
+  }
+
+  function userHistory(Request $request)
+  {
+    try {
+      $data = UserSurveyTheme::select([
+        'user_survey_theme.*',
+        'users.name as name'
+      ])
+        ->join('user_survey', 'user_survey.id', 'user_survey_theme.user_survey_id')
+        ->leftJoin('users', 'users.id', 'user_survey.user_id')
+        ->where('users.id', $request->user_id)
+        ->get();
+      return response()->json($data, 200);
     } catch (Exception $e) {
       return response()->json($e->getMessage(), 412);
     }

@@ -40,6 +40,7 @@ class ThemeController extends Controller
       return response()->json($request->all(), 200);
     } catch (Exception $e) {
       DB::rollBack();
+      $this->setTableAutoInc((new Theme())->getTable());
       return response()->json($e->getMessage(), 412);
     }
   }
@@ -51,7 +52,6 @@ trait ServiceTheme
   private function prepare($request)
   {
     if ($request->has('user_survey_id')) {
-
       $data = Theme::select([
         'theme.id AS theme_id',
         'theme.name AS theme_name',
@@ -65,23 +65,27 @@ trait ServiceTheme
         'user_survey_theme.time_expired AS user_survey_theme_time_expired',
         'user_survey_theme.score AS user_survey_theme_score',
         'user_survey_theme.status AS user_survey_theme_status',
+        'user_survey_theme.status_table AS user_survey_theme_status_table',
       ])
         ->join('user_survey_theme', 'user_survey_theme.theme_id', 'theme.id')
-        ->leftJoin('user_survey',  'user_survey_theme.user_survey_id','user_survey.id')
+        ->leftJoin('user_survey', 'user_survey_theme.user_survey_id', 'user_survey.id')
         ->where('user_survey.id', $request->user_survey_id)
         ->where('theme.status', 'A')
+        ->where('user_survey_theme.status_table', 'A')
         ->orderBy('theme.id');
-
-    } elseif ($request->has('survey_id')) {
-
-      $data = Theme::where('theme.survey_id', $request->survey_id);
-
+      return $data;
     } else {
-
-      $data = Theme::select(['theme.*']);
-
+      if ($request->has('survey_id')) {
+        $data = Theme::where('theme.survey_id', $request->survey_id);
+        if ($request->has('status')) {
+          $data = $data->where('theme.status', $request->status);
+        } else {
+          $data = $data->where('theme.status', 'A');
+        }
+      } else {
+        $data = Theme::select(['theme.*'])->where('status', 'A');
+      }
+      return $data;
     }
-
-    return $data;
   }
 }

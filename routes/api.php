@@ -17,6 +17,7 @@ Route::group(['middleware' => ['cors:api']], function ($route) {
 
     //User
     $route->get('/get-users', 'UserController@getUsers');
+    $route->get('/all-user', 'UserController@all');
     $route->post('/u-object-rest-apis-application', 'UserController@getConfig');
 
     //Roles
@@ -37,6 +38,7 @@ Route::group(['middleware' => ['cors:api']], function ($route) {
 
     //User Survey Theme
     $route->post('/create-user-survey-theme', 'UserSurveyThemeController@create');
+    $route->get('/get-user-history', 'UserSurveyThemeController@userHistory');
 
     //Theme
     $route->get('/get-themes-by-user-survey-theme', 'ThemeController@getThemesByUserSurveyThemeId');
