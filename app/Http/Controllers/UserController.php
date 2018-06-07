@@ -28,9 +28,9 @@ class UserController extends LoginController
       foreach ($dataUsers as $k => $v) {
         array_push($data, ['id' => $v['id'], 'value' => $v['name']]);
       }
-      return response()->json($dataUsers, 200);
+      return response()->json($data, 200);
     } catch (Exception $e) {
-      return response()->json($e->getMessage());
+      return response()->json($e->getMessage(),412);
     }
   }
 
