@@ -61,7 +61,9 @@ trait SurveyService
       $data = Survey::select(['survey.*']);
     }
     if ($request->has('status')) {
-      $data = $data->where('survey.status', $request->status);
+      if ($request->get('status') != '') {
+        $data = $data->where('survey.status', $request->status);
+      }
     } else {
       $data = $data->where('survey.status', 'A');
     }
