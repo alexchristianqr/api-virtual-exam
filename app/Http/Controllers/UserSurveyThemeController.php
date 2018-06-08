@@ -42,12 +42,23 @@ class UserSurveyThemeController extends Controller
   {
     try {
       $data = UserSurveyTheme::select([
-        'user_survey_theme.*',
-        'users.name as name'
+        'users.name as name',
+        'theme.duration',
+        'theme.name AS theme_name',
+        'user_survey_theme.date_start',
+        'user_survey_theme.date_expired',
+        'user_survey_theme.status',
+        'users.id AS user_id',
+        'user_survey.id AS user_survey_id',
+        'user_survey_theme.score',
+        'user_survey_theme.id AS user_survey_theme_id',
+        'user_survey_theme.status AS user_survey_theme_status'
       ])
+        ->join('theme', 'theme.id', 'user_survey_theme.theme_id')
         ->join('user_survey', 'user_survey.id', 'user_survey_theme.user_survey_id')
         ->leftJoin('users', 'users.id', 'user_survey.user_id')
         ->where('users.id', $request->user_id)
+        ->orderBy('user_survey_theme.date_start','DESC')
         ->get();
       return response()->json($data, 200);
     } catch (Exception $e) {
