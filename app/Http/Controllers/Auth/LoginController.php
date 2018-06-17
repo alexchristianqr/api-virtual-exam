@@ -3,126 +3,88 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\UserService;
 use App\User;
+use function GuzzleHttp\Psr7\str;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Exception;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
+  /*
+  |--------------------------------------------------------------------------
+  | Login Controller
+  |--------------------------------------------------------------------------
+  |
+  | This controller handles authenticating users for the application and
+  | redirecting them to your home screen. The controller uses a trait
+  | to conveniently provide its functionality to your applications.
+  |
+  */
 
-    use AuthenticatesUsers;
+  use AuthenticatesUsers;
 
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
+  /**
+   * Where to redirect users after login.
+   *
+   * @var string
+   */
+  protected $redirectTo = '/home';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('cors');
+  /**
+   * Create a new controller instance.
+   *
+   * @return void
+   */
+  public function __construct()
+  {
+    $this->middleware('cors');
+  }
+
+  public function login(Request $request)
+  {
+    try {
+      $User = (new UserService())->searchUser($request);
+      if ($User) {
+        return response()->json($User, 200);
+      } else {
+        return response()->json("User not found", 412);
+      }
+    } catch (Exception $e) {
+      return response()->json($e->getMessage(), 412);
     }
+  }
 
-    public function login(Request $request)
-    {
-        try {
-            $User = User::select([
-                'users.id',
-                'users.role_id AS role',
-                'users.project_id AS project',
-                'users.name',
-                'users.username',
-                'users.email',
-                'users.status',
-                'role.name AS role_name',
-                'role.status AS role_status',
-                'project.name AS project_name',
-                'project.status AS project_status'
-            ])
-                ->join('role', 'role.id', '=', 'users.role_id')
-                ->join('project', 'project.id', '=', 'users.project_id')
-                ->where('users.username', $request->username)
-                ->first();
-            if ($User) {
-                $User->role = ['id' => $User->role, 'name' => $User->role_name, 'status' => $User->role_status];
-                $User->project = ['id' => $User->project, 'name' => $User->project_name, 'status' => $User->project_status];
-                return response()->json($User, 200);
-            } else {
-                return response()->json("User not found", 412);
-            }
-        } catch (Exception $e) {
-            return response()->json($e->getMessage(), 412);
+  function validateIfExist(Request $request)
+  {
+    $status = 412;
+    try {
+      $dataUser = User::where('username', $request->username)->first();
+      if ($dataUser) {
+        switch ($dataUser->status) {
+          case 'I':
+            $status = 401;
+            throw new Exception(utf8_encode( '<span>Estimado usuario su cuenta esta <b>Inactiva</b>, por favor cont&aacutecte al administrador del sistema.<span>'), $status);
+            break;
+          case 'E':
+            $status = 401;
+            throw new Exception(utf8_encode('<span>Estimado usuario su cuenta esta <b>Eliminada</b>, por favor cont&aacutecte al administrador del sistema.<span>'), $status);
+            break;
+          default:
+            $User = (new UserService())->searchUser($request);
+            break;
         }
+        return response()->json($User, 200);
+      } else {
+        (new UserService())->createUser($request);
+        $User = (new UserService())->searchUser($request);
+        return response()->json($User, 201);
+      }
+    } catch (Exception $e) {
+      return response()->json($e->getMessage(), $status);
     }
+  }
 
-    public function searchUser($request)
-    {
-            $User = User::select([
-                'users.id',
-                'users.role_id AS role',
-                'users.project_id AS project',
-                'users.name',
-                'users.username',
-                'users.email',
-                'users.status',
-                'role.name AS role_name',
-                'role.status AS role_status',
-                'project.name AS project_name',
-                'project.status AS project_status'
-            ])
-                ->join('role', 'role.id', '=', 'users.role_id')
-                ->join('project', 'project.id', '=', 'users.project_id')
-                ->where('users.username', $request->username)
-                ->first();
-
-                $User->role = ['id' => $User->role, 'name' => $User->role_name, 'status' => $User->role_status];
-                $User->project = ['id' => $User->project, 'name' => $User->project_name, 'status' => $User->project_status];
-                return $User;
-    }
-
-    function validateIfExist(Request $request)
-    {
-        try {
-            $dataUser = User::where('username', $request->username)->first();
-            if ($dataUser) {
-                $User = $this->searchUser($request);
-                return response()->json($User, 200);
-            } else {
-                $this->createUser($request);
-                $User = $this->searchUser($request);
-                return response()->json($User, 201);
-            }
-        } catch (Exception $e) {
-            return response()->json($e->getMessage(), 412);
-        }
-    }
-
-    private function createUser($request)
-    {
-        $User = new User();
-        $User->fill($request->all());
-        $User->email = $request->username.'@sapia.com.pe';//siempre es invitado
-        $User->role_id = 5;//inicializar como invitado
-        $User->project_id = 1;//inicializar con ningun proyecto asignado
-        $User->status = 'A';//inicializar como activo
-        return $User->save();
-    }
 
 }

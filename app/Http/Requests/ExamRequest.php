@@ -31,7 +31,6 @@ class ExamRequest extends FormRequest
                     'theme_id' => 'required',
                     'name' => 'required',
                     'level' => 'required',
-//                    'option_answer_id' => 'required',
                 ];
                 break;
             case 'PUT':

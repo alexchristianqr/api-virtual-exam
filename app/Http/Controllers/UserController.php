@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Services\UserService;
 use App\User;
 use Illuminate\Http\Request;
 use Exception;
@@ -13,35 +14,31 @@ class UserController extends LoginController
   function getConfig(Request $request)
   {
     try {
-      $data = $this->searchUser($request);
+      $data = (new UserService())->searchUser($request);
       return response()->json($data, 200);
     } catch (Exception $e) {
       return response()->json($e->getMessage(), 412);
     }
   }
 
-  function getUsers()
+  function getUsers(Request $request)
   {
     try {
       $data = [];
-      $dataUsers = User::where('status', 'A')->get(['id', 'name'])->toArray();
+      $dataUsers = (new UserService())->getUsers($request);
       foreach ($dataUsers as $k => $v) {
         array_push($data, ['id' => $v['id'], 'value' => $v['name']]);
       }
       return response()->json($data, 200);
     } catch (Exception $e) {
-      return response()->json($e->getMessage(),412);
+      return response()->json($e->getMessage(), 412);
     }
   }
 
   function all(Request $request)
   {
     try {
-      if ($request->get('status') != '') {
-        $dataUsers = User::where('status', $request->status)->get();
-      } else {
-        $dataUsers = User::get();
-      }
+      $dataUsers = (new UserService())->all($request);
       return response()->json($dataUsers, 200);
     } catch (Exception $e) {
       return response()->json($e->getMessage(), 412);

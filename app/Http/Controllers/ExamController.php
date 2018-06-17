@@ -168,6 +168,7 @@ trait ExamService
 
   private function updateUserSurveyTheme($request, $puntaje, $option_answer_ids)
   {
-    UserSurveyTheme::where('id', $request->user_survey_theme_id)->update(['option_answer_ids' => json_encode($option_answer_ids), 'score' => $puntaje, 'status' => 'PR']);
+    //Actualizamos el estado a REALIZADO/SOLUCION
+    UserSurveyTheme::where('id', $request->user_survey_theme_id)->update(['option_answer_ids' => json_encode($option_answer_ids), 'score' => $puntaje, 'status' => 'RS']);
   }
 }
