@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserSurveyThemeController extends Controller
 {
+
   function create(Request $request)
   {
     DB::beginTransaction();

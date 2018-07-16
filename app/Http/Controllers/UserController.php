@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Services\UserService;
-use App\User;
 use Illuminate\Http\Request;
 use Exception;
 
-class UserController extends LoginController
+class UserController extends Controller
 {
 
   function getConfig(Request $request)

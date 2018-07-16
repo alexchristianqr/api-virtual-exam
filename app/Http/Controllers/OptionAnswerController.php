@@ -9,6 +9,7 @@ use Exception;
 
 class OptionAnswerController extends Controller
 {
+
   function all(Request $request)
   {
     try {
@@ -62,4 +63,5 @@ class OptionAnswerController extends Controller
     if ($flag) shuffle($NewOptionAnswer);
     return $NewOptionAnswer;
   }
+
 }

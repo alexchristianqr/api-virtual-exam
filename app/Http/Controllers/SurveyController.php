@@ -2,71 +2,54 @@
 
 namespace App\Http\Controllers;
 
-use App\Survey;
-use App\UserSurvey;
+use App\Http\Services\SurveyService;
 use Illuminate\Http\Request;
 use Exception;
 
 class SurveyController extends Controller
 {
-  use SurveyService;
 
+  /**
+   * Cosultar la tabla "survey" por la tabla relacionada "user_survey"
+   * @param Request $request
+   * @return \Illuminate\Http\JsonResponse
+   */
   function getSurveysByUserSurvey(Request $request)
   {
     try {
-      return response()->json($this->prepare($request)->get(), 200);
+      return response()->json((new SurveyService())->getSurveys_by_UserSurvey($request), 200);
     } catch (Exception $e) {
       return response()->json($e->getMessage(), 412);
     }
   }
 
+  /**
+   * Consultar la tabla "survey"
+   * @param Request $request
+   * @return \Illuminate\Http\JsonResponse
+   */
   function getSurveys(Request $request)
   {
     try {
-      return response()->json($this->prepare($request)->get(), 200);
+      return response()->json((new SurveyService())->getSurveys($request), 200);
     } catch (Exception $e) {
       return response()->json($e->getMessage(), 412);
     }
   }
 
-  function create(Request $request)
+  /**
+   * Crear en la tabla "survey"
+   * @param Request $request
+   * @return \Illuminate\Http\JsonResponse
+   */
+  function createSurvey(Request $request)
   {
     try {
-      $Survey = new Survey();
-      if (is_array($request->get('user_id'))) {
-        $Survey->fill($request->all())->save();
-        foreach ($request->get('user_id') as $item) {
-          UserSurvey::create(['user_id' => $item['id'], 'survey_id' => $Survey->id]);
-        }
-        return response()->json($request->all(), 200);
-      } else {
-        throw new Exception('El parámetro $user_id no es un array.');
-      }
+      $return = (new SurveyService())->createSurvey($request);
+      return response()->json($return, 200);
     } catch (Exception $e) {
       return response()->json($e->getMessage(), 412);
     }
   }
 
-}
-
-trait SurveyService
-{
-  private function prepare($request)
-  {
-    if ($request->has('user_id')) {
-      $data = Survey::select(['survey.*', 'user_survey.id AS user_survey_id'])
-        ->join('user_survey', 'user_survey.survey_id', 'survey.id')
-        ->where('user_survey.user_id', $request->user_id);
-    } else {
-      $data = Survey::select(['survey.*']);
-    }
-    if ($request->has('status')) {
-      if ($request->get('status') != '') {
-        $data = $data->where('survey.status', $request->status);
-      }
-    } else {
-      $data = $data->where('survey.status', 'A');
-    }
-    return $data;
-  }
 }

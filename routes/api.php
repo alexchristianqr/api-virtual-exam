@@ -33,10 +33,12 @@ Route::group(['middleware' => ['cors:api']], function ($route) {
     //Survey
     $route->get('/get-surveys', 'SurveyController@getSurveys');
     $route->get('/get-surveys-by-user-survey', 'SurveyController@getSurveysByUserSurvey');
-    $route->post('/create-survey', 'SurveyController@create');
-    $route->put('/update-user-survey-theme', 'SurveyController@update');
+    $route->post('/create-survey', 'SurveyController@createSurvey');
 
-    //User Survey Theme
+    // User-Survey
+    $route->post('/create-user-survey', 'UserSurveyController@createUserSurvey');
+
+    //User-Survey-Theme
     $route->post('/create-user-survey-theme', 'UserSurveyThemeController@create');
     $route->get('/get-user-history', 'UserSurveyThemeController@userHistory');
 
@@ -58,7 +60,7 @@ Route::group(['middleware' => ['cors:api']], function ($route) {
     $route->post('/create-question', 'QuestionController@create');
     $route->put('/update-question/{question_id}', 'QuestionController@update');
 
-    //Option Answer
+    //OptionAnswer
     $route->get('/all-option-answer', 'OptionAnswerController@all');
     $route->post('/create-option-answer', 'OptionAnswerController@create');
     $route->put('/update-option-answer', 'OptionAnswerController@update');

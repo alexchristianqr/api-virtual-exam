@@ -8,11 +8,11 @@
 
 namespace App\Http\Services;
 
-
 use App\User;
 
 class UserService
 {
+
   /**
    * @param $request : Request
    * @param array $columns : Columns for Query in the Databse
@@ -85,12 +85,17 @@ class UserService
 
   function createUser($request)
   {
-    $User = new User();
-    $User->fill($request->all());
-    $User->email = $request->username . '@sapia.com.pe';//siempre es invitado
-    $User->role_id = 5;//inicializar como invitado
-    $User->project_id = 1;//inicializar con ningun proyecto asignado
-    $User->status = 'A';//inicializar como activo
-    return $User->save();
+    $newUser = new User();
+    $newUser->fill($request->all());
+    $newUser->email = $request->username . '@sapia.com.pe';//siempre es invitado
+    $newUser->role_id = 5;//inicializar como invitado
+    $newUser->project_id = 1;//inicializar con ningun proyecto asignado
+    $newUser->status = 'A';//inicializar como activo
+    $newUser->save();
+    if (isset($newUser->id)) {
+      $request->request->add(['user_id' => $newUser->id]);
+      (new SurveyService())->createUserSurvey($request);
+    }
   }
+
 }

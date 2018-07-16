@@ -13,6 +13,7 @@ use App\UserSurveyTheme;
 
 class UserSurveyThemeService
 {
+
   function getUserSurveyTheme()
   {
     return UserSurveyTheme::where('status', 'P')->get();
@@ -22,4 +23,5 @@ class UserSurveyThemeService
   {
     return UserSurveyTheme::where('id', $id)->update(['status' => $status]);
   }
+
 }
