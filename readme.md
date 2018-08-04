@@ -6,7 +6,7 @@ Es un servicio REST API para la comunicacion de entre servicios Fronted y Backen
 - Rest
 
 ## Tecnología
-* Principal
+* Primario
   - Framework Laravel 5.4.*
   - Php7
 * Secundario
