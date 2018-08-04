@@ -1,6 +1,6 @@
-# Proyecto: Servicio Rest Api Evaluaciones Virtuales
+# Proyecto: Restapi Evaluaciones Virtuales
 
-El servicio rest es un software de comunicación segura entre la plataforma cliente web del usuario y nuestros servidores PHP
+Es un servicio REST API para la comunicacion de entre servicios Fronted y Backend.
 
 ## Arquitectura
 - Rest
