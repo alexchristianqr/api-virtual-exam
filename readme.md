@@ -1,4 +1,4 @@
-## Proyecto: Servicio Rest Api Evaluaciones Virtuales
+# Proyecto: Servicio Rest Api Evaluaciones Virtuales
 
 El servicio rest es un software de comunicación segura entre la plataforma cliente web del usuario y nuestros servidores PHP
 
@@ -7,9 +7,8 @@ El servicio rest es un software de comunicación segura entre la plataforma clie
 
 ## Tecnología
 * Principal
-  - Laravel 5.4 Framework
+  - Framework Laravel 5.4.*
   - Php7
-  
 * Secundario
   - Webpack
   - ES6
